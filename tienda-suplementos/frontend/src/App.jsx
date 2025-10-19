@@ -3,7 +3,7 @@ import { useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import TextCarrousel from './components/TextCarrousel';
 import Home from './pages/Home';
-import Products from './pages/Products';
+import Products from './pages/Products.jsx';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import SimpleCheckoutPage from './pages/SimpleCheckout';
@@ -20,6 +20,7 @@ import Login from './pages/Login';
 import VerifyEmail from './pages/VerifyEmail';
 import Profile from './pages/Profile';
 import WhatsappFloatButton from './components/WhatsappFloatButton';
+import ScrollToTop from './components/ScrollToTop';
 import AdminProducts from './pages/AdminProducts';
 import AdminCombos from './pages/AdminCombos';
 import AdminCatalogView from './pages/AdminCatalogView';
@@ -54,6 +55,7 @@ function App() {
   if (isAdminAuthed && isAdminRoute) {
     return (
       <AdminLayout>
+  <ScrollToTop smooth />
         <Routes>
           <Route path="/" element={<RequireAdmin><AdminProducts /></RequireAdmin>} />
           <Route path="/products" element={<RequireAdmin><AdminProducts /></RequireAdmin>} />
@@ -80,6 +82,7 @@ function App() {
   return (
     <div>
       {/* Los admins pueden navegar a la home pública sin redirección */}
+  <ScrollToTop smooth />
       {!hideHeader && <Header />}
       {!hideCarrousel && <TextCarrousel offset={0} />}
       <CartDrawer />
