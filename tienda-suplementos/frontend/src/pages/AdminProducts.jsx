@@ -5,12 +5,46 @@ import { useAuth } from '../context/AuthContext';
 import ProductForm from '../components/admin/ProductForm';
 import AdminPageManagement from '../components/AdminPageManagement';
 
-// Lista completa de categorías (versión original)
-const ALL_CATEGORIES = ['Proteínas','Creatina','Aminoácidos','Pre-Workout','Vitaminas','Para la salud','Complementos','Comida'];
+// Taxonomía 2025 (7 categorías nuevas, nombres de visualización)
+const ALL_CATEGORIES = [
+  'Proteínas',
+  'Pre-entrenos y Energía',
+  'Creatinas',
+  'Aminoácidos y Recuperadores',
+  'Salud y Bienestar',
+  'Rendimiento hormonal',
+  'Comidas con proteína'
+];
+
+// Normalización de categorías del backend (legacy -> nuevas visibles)
+const normalizeCategory = (raw) => {
+  const c = (raw || '').trim();
+  const map = {
+    // Legacy principales
+    'Pre-Workout': 'Pre-entrenos y Energía',
+    'Aminoácidos': 'Aminoácidos y Recuperadores',
+    'Vitaminas': 'Salud y Bienestar',
+    'Para la salud': 'Salud y Bienestar',
+    'Complementos': 'Rendimiento hormonal',
+    'Comida': 'Comidas con proteína',
+    'Creatina': 'Creatinas',
+    // Ya nuevas
+    'Proteínas': 'Proteínas',
+    'Pre-entrenos y Energía': 'Pre-entrenos y Energía',
+    'Creatinas': 'Creatinas',
+    'Aminoácidos y Recuperadores': 'Aminoácidos y Recuperadores',
+    'Salud y Bienestar': 'Salud y Bienestar',
+    'Rendimiento hormonal': 'Rendimiento hormonal',
+    'Comidas con proteína': 'Comidas con proteína',
+  };
+  return map[c] || c || 'Sin categoría';
+};
 
 // Tipos/Subcategorías por categoría
+// Soporta alias legacy ('Creatina') y nuevo ('Creatinas')
 const CATEGORY_TYPES = {
   'Proteínas': ['Limpia', 'Hipercalórica', 'Vegana'],
+  'Creatinas': ['Monohidrato', 'HCL'],
   'Creatina': ['Monohidrato', 'HCL']
 };
 
@@ -21,6 +55,10 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Resumen por categoría desde backend (nuevo endpoint)
+  const [catSummary, setCatSummary] = useState(null);
+  const [catSummaryLoading, setCatSummaryLoading] = useState(false);
+  const [catSummaryError, setCatSummaryError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null); // producto en edición
   const [saving, setSaving] = useState(false);
@@ -54,6 +92,22 @@ export default function AdminProducts() {
   };
 
   useEffect(() => { fetchProducts(); }, []);
+
+  // Nuevo: fetch resumen categorías
+  const fetchCategorySummary = async () => {
+    try {
+      setCatSummaryLoading(true); setCatSummaryError(null);
+      const { data } = await axios.get('/api/products/admin/category-summary');
+      setCatSummary(Array.isArray(data?.data) ? data.data : null);
+    } catch (e) {
+      setCatSummaryError(e.response?.data?.message || 'No se pudo obtener el resumen de categorías');
+      setCatSummary(null); // fallback al cliente
+    } finally {
+      setCatSummaryLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchCategorySummary(); }, []);
 
   const fetchUsers = async () => {
     try {
@@ -93,20 +147,25 @@ export default function AdminProducts() {
 
   // Derivar categorías únicas asegurando mostrar todas las soportadas (aunque tengan 0 productos)
   const categories = useMemo(() => {
-    const set = new Set(products.map(p => p.category || 'Sin categoría'));
+    if (Array.isArray(catSummary) && catSummary.length > 0) {
+      // Usar orden del backend (ya alineado a la taxonomía)
+      return catSummary.map(r => r.category);
+    }
+    const set = new Set(products.map(p => normalizeCategory(p.category)));
     ALL_CATEGORIES.forEach(c => set.add(c));
     return ALL_CATEGORIES.filter(c => set.has(c)); // preserva orden lógico definido arriba
-  }, [products]);
+  }, [products, catSummary]);
 
   const filteredProducts = useMemo(() => {
     let list = products;
     if (selectedCategory) {
-      list = list.filter(p => (p.category || 'Sin categoría') === selectedCategory);
+      list = list.filter(p => normalizeCategory(p.category) === selectedCategory);
     }
     // Filtrar por tipo/subcategoría si está seleccionado
     if (selectedType) {
       list = list.filter(p => {
-        const productType = p.tipo || (p.category === 'Proteínas' ? 'Limpia' : p.category === 'Creatina' ? 'Monohidrato' : null);
+        const cat = p.category;
+        const productType = p.tipo || (cat === 'Proteínas' ? 'Limpia' : (cat === 'Creatina' || cat === 'Creatinas') ? 'Monohidrato' : null);
         return productType === selectedType;
       });
     }
@@ -205,7 +264,7 @@ export default function AdminProducts() {
           
           {/* Botones de acción */}
           <div className="flex gap-3 items-center">
-            <button onClick={fetchProducts} className="text-xs px-3 py-1 rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200">Refrescar</button>
+            <button onClick={() => { fetchProducts(); fetchCategorySummary(); }} className="text-xs px-3 py-1 rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200">Refrescar</button>
             
             {/* Botón verde para crear producto */}
             <button
@@ -231,8 +290,8 @@ export default function AdminProducts() {
           </div>
         </header>
 
-        {loading && <p className="text-sm text-gray-500">Cargando categorías...</p>}
-  {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">{error}</div>}
+    {(loading || catSummaryLoading) && <p className="text-sm text-gray-500">Cargando categorías...</p>}
+    {(error || catSummaryError) && <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">{error || catSummaryError}</div>}
 
         {!loading && categories.length === 0 && (
           <div className="text-sm text-gray-500">No hay productos aún.</div>
@@ -240,57 +299,52 @@ export default function AdminProducts() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {categories.map(cat => {
-            // Conteos e indicadores
-            const total = products.filter(p => (p.category || 'Sin categoría') === cat).length;
-            const activos = products.filter(p => (p.category || 'Sin categoría') === cat && p.isActive).length;
-            const inactivos = total - activos;
-            const sinStock = products.filter(p => (p.category || 'Sin categoría') === cat && p.inStock === false).length;
+            // Conteos e indicadores (usar summary si está disponible)
+            const row = Array.isArray(catSummary) ? catSummary.find(r => r.category === cat) : null;
+            const total = row ? row.total : products.filter(p => normalizeCategory(p.category) === cat).length;
+            const activos = row ? row.active : products.filter(p => normalizeCategory(p.category) === cat && p.isActive).length;
+            const inactivos = row ? row.inactive : (total - activos);
+            const sinStock = row ? row.outOfStock : products.filter(p => normalizeCategory(p.category) === cat && p.inStock === false).length;
             return (
               <button
                 key={cat}
                 onClick={() => handleCategorySelect(cat)}
-                className="group relative p-6 rounded-xl shadow-sm hover:shadow-lg border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:from-red-50 hover:to-orange-50 hover:border-black transition-all duration-300 flex flex-col text-left transform hover:-translate-y-1"
+                className="group relative p-5 rounded-lg border-2 border-gray-200 bg-white hover:border-red-600 hover:shadow-lg transition-all duration-200 flex flex-col text-left"
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-700 transition-colors">{cat}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-red-700">{cat}</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
                       {total} producto{total!==1?'s':''}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-red-100 group-hover:bg-red-200 flex items-center justify-center transition-all">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-red-50 group-hover:bg-red-600 transition-colors">
+                    <svg className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                <div className="flex items-center gap-3 text-xs mb-3">
+                  <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     {activos}
                   </span>
                   {inactivos>0 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
-                      </svg>
+                    <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-gray-400"></span>
                       {inactivos}
                     </span>
                   )}
                   {sinStock>0 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
+                    <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
                       {sinStock}
                     </span>
                   )}
                 </div>
                 
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 group-hover:border-red-200 transition-colors">
+                <div className="mt-auto pt-3 border-t border-gray-100">
                   <span className="text-sm text-red-600 font-semibold group-hover:text-red-700 flex items-center gap-1">
                     Administrar
                     <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -389,45 +443,43 @@ export default function AdminProducts() {
                 <button
                   key={category}
                   onClick={() => navigate(`/admin/combos/${category.toLowerCase()}`)}
-                  className="group relative p-6 rounded-xl shadow-sm hover:shadow-lg border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:from-red-50 hover:to-orange-50 hover:border-red-300 transition-all duration-300 flex flex-col text-left transform hover:-translate-y-1"
+                  className="group relative p-5 rounded-lg border-2 border-gray-200 bg-white hover:border-red-600 hover:shadow-lg transition-all duration-200 flex flex-col text-left"
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-700 transition-colors">{category}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-red-700">{category}</h3>
+                      <p className="text-sm text-gray-500 mt-0.5">
                         {categoryCount} combo{categoryCount !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <div className="w-12 h-12 rounded-full bg-red-100 group-hover:bg-red-200 flex items-center justify-center transition-all">
-                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-red-50 group-hover:bg-red-600 transition-colors">
+                      <svg className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                       </svg>
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
+                  <div className="flex items-center gap-3 text-xs mb-3">
+                    <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
                       {inStockCount}
                     </span>
                     
                     {(categoryCount - inStockCount) > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
+                      <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-gray-400"></span>
                         {categoryCount - inStockCount}
                       </span>
                     )}
                   </div>
                   
-                  <div className="mt-auto flex items-center justify-between text-xs text-red-600 group-hover:text-red-700 font-medium">
-                    <span>Administrar {category}</span>
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                  <div className="mt-auto pt-3 border-t border-gray-100">
+                    <span className="text-sm text-red-600 font-semibold group-hover:text-red-700 flex items-center gap-1">
+                      Administrar {category}
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
                   </div>
                 </button>
               );
@@ -527,18 +579,21 @@ export default function AdminProducts() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {categoryHasTypes.map(tipo => {
             // Conteos por tipo
-            const productosEnCategoria = products.filter(p => p.category === selectedCategory);
+            const productosEnCategoria = products.filter(p => normalizeCategory(p.category) === selectedCategory);
             const total = productosEnCategoria.filter(p => {
-              const productType = p.tipo || (selectedCategory === 'Proteínas' ? 'Limpia' : 'Monohidrato');
+              const cat = p.category;
+              const productType = p.tipo || (selectedCategory === 'Proteínas' ? 'Limpia' : (cat === 'Creatina' || cat === 'Creatinas') ? 'Monohidrato' : '');
               return productType === tipo;
             }).length;
             const activos = productosEnCategoria.filter(p => {
-              const productType = p.tipo || (selectedCategory === 'Proteínas' ? 'Limpia' : 'Monohidrato');
+              const cat = p.category;
+              const productType = p.tipo || (selectedCategory === 'Proteínas' ? 'Limpia' : (cat === 'Creatina' || cat === 'Creatinas') ? 'Monohidrato' : '');
               return productType === tipo && p.isActive;
             }).length;
             const inactivos = total - activos;
             const sinStock = productosEnCategoria.filter(p => {
-              const productType = p.tipo || (selectedCategory === 'Proteínas' ? 'Limpia' : 'Monohidrato');
+              const cat = p.category;
+              const productType = p.tipo || (selectedCategory === 'Proteínas' ? 'Limpia' : (cat === 'Creatina' || cat === 'Creatinas') ? 'Monohidrato' : '');
               return productType === tipo && p.inStock === false;
             }).length;
 
@@ -546,49 +601,43 @@ export default function AdminProducts() {
               <button
                 key={tipo}
                 onClick={() => handleTypeSelect(tipo)}
-                className="group relative p-6 rounded-xl shadow-sm hover:shadow-lg border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:from-rose-50 hover:to-pink-50 hover:border-rose-300 transition-all duration-300 flex flex-col text-left transform hover:-translate-y-1"
+                className="group relative p-5 rounded-lg border-2 border-gray-200 bg-white hover:border-red-600 hover:shadow-lg transition-all duration-200 flex flex-col text-left"
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-rose-700 transition-colors">{tipo}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-red-700">{tipo}</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
                       {total} producto{total!==1?'s':''}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-rose-100 group-hover:bg-rose-200 flex items-center justify-center transition-all">
-                    <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-red-50 group-hover:bg-red-600 transition-colors">
+                    <svg className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                <div className="flex items-center gap-3 text-xs mb-3">
+                  <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     {activos}
                   </span>
                   {inactivos>0 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
-                      </svg>
+                    <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-gray-400"></span>
                       {inactivos}
                     </span>
                   )}
                   {sinStock>0 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
+                    <span className="flex items-center gap-1.5 text-gray-700 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
                       {sinStock}
                     </span>
                   )}
                 </div>
                 
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 group-hover:border-rose-200 transition-colors">
-                  <span className="text-sm text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-1">
+                <div className="mt-auto pt-3 border-t border-gray-100">
+                  <span className="text-sm text-red-600 font-semibold group-hover:text-red-700 flex items-center gap-1">
                     Ver Productos
                     <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />

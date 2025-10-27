@@ -43,6 +43,39 @@ const upload = multer({
   }
 });
 
+// --- Utilidades de taxonomía ---
+const NEW_TAXONOMY = [
+  'Proteínas',
+  'Pre-entrenos y Energía',
+  'Creatinas',
+  'Aminoácidos y Recuperadores',
+  'Salud y Bienestar',
+  'Rendimiento hormonal',
+  'Comidas con proteína'
+];
+
+const normalizeCategory = (c) => {
+  const cat = (c || '').trim();
+  const map = {
+    'Pre-Workout': 'Pre-entrenos y Energía',
+    'Aminoácidos': 'Aminoácidos y Recuperadores',
+    'Vitaminas': 'Salud y Bienestar',
+    'Para la salud': 'Salud y Bienestar',
+    'Complementos': 'Rendimiento hormonal',
+    'Comida': 'Comidas con proteína',
+    'Creatina': 'Creatinas',
+    // Nuevas (ya normalizadas)
+    'Proteínas': 'Proteínas',
+    'Pre-entrenos y Energía': 'Pre-entrenos y Energía',
+    'Creatinas': 'Creatinas',
+    'Aminoácidos y Recuperadores': 'Aminoácidos y Recuperadores',
+    'Salud y Bienestar': 'Salud y Bienestar',
+    'Rendimiento hormonal': 'Rendimiento hormonal',
+    'Comidas con proteína': 'Comidas con proteína'
+  };
+  return map[cat] || cat || 'Sin categoría';
+};
+
 // POST /api/products/upload-image (subir imagen) - admin
 router.post('/upload-image', protect, isAdmin, upload.single('image'), async (req, res) => {
   try {
@@ -61,6 +94,42 @@ router.post('/upload-image', protect, isAdmin, upload.single('image'), async (re
   } catch (error) {
     console.error('Error al subir imagen:', error);
     res.status(500).json({ success: false, message: error.message || 'Error al subir la imagen' });
+  }
+});
+
+// GET /api/products/admin/category-summary (resumen normalizado por nueva taxonomía) - admin
+router.get('/admin/category-summary', protect, isAdmin, async (req, res) => {
+  try {
+    const products = await Product.find({}).select('category isActive inStock');
+
+    const summaryMap = new Map();
+    // Inicializar con 0 para todas las categorías nuevas
+    for (const cat of NEW_TAXONOMY) {
+      summaryMap.set(cat, { category: cat, total: 0, active: 0, inactive: 0, outOfStock: 0 });
+    }
+
+    for (const p of products) {
+      const cat = normalizeCategory(p.category);
+      if (!summaryMap.has(cat)) {
+        summaryMap.set(cat, { category: cat, total: 0, active: 0, inactive: 0, outOfStock: 0 });
+      }
+      const row = summaryMap.get(cat);
+      row.total += 1;
+      if (p.isActive === true) row.active += 1; else if (p.isActive === false) row.inactive += 1;
+      if (p.inStock === false) row.outOfStock += 1;
+    }
+
+    // Ordenar según la nueva taxonomía, dejando al final cualquier categoría no reconocida
+    const data = Array.from(summaryMap.values()).sort((a, b) => {
+      const ia = NEW_TAXONOMY.indexOf(a.category);
+      const ib = NEW_TAXONOMY.indexOf(b.category);
+      return (ia === -1 ? Number.MAX_SAFE_INTEGER : ia) - (ib === -1 ? Number.MAX_SAFE_INTEGER : ib);
+    });
+
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error en category-summary:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener el resumen de categorías' });
   }
 });
 

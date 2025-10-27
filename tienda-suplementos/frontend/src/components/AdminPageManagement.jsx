@@ -11,52 +11,37 @@ const AdminPageManagement = () => {
       icon: Package,
       description: 'Gestionar categorías de productos',
       path: '/admin/catalog',
-      color: 'from-red-50 to-pink-50',
-      iconBg: 'bg-red-100',
-      iconColor: 'text-red-600'
     },
     {
       title: 'Accesorios',
       icon: Dumbbell,
       description: 'Gestionar accesorios y subcategorías',
       path: '/admin/accessories',
-      color: 'from-blue-50 to-cyan-50',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600'
     },
     {
       title: 'Volumen',
       icon: TrendingUp,
       description: 'Ver productos de volumen',
       path: '/products/volumen',
-      color: 'from-purple-50 to-indigo-50',
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600'
     },
     {
       title: 'Definición',
       icon: Activity,
       description: 'Ver productos de definición',
       path: '/products/definicion',
-      color: 'from-orange-50 to-amber-50',
-      iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600'
     },
     {
       title: 'Inicio',
       icon: ShoppingBag,
       description: 'Ir a la página de inicio',
       path: '/',
-      color: 'from-gray-50 to-slate-50',
-      iconBg: 'bg-gray-100',
-      iconColor: 'text-gray-700'
     }
   ];
 
   return (
     <div className="container mx-auto px-6 py-8 mt-8">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Administración de Página</h2>
+      <div className="bg-gradient-to-r from-red-50 to-white rounded-lg p-6 border-2 border-red-100 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Administración de Página</h2>
         <p className="text-gray-600">Navega por las diferentes secciones de la tienda</p>
       </div>
 
@@ -67,28 +52,28 @@ const AdminPageManagement = () => {
             <button
               key={section.path}
               onClick={() => navigate(section.path)}
-              className={`bg-gradient-to-br ${section.color} border-2 border-gray-200 rounded-2xl p-6 text-left transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:-translate-y-1`}
+              className="group bg-white border-2 border-gray-200 rounded-lg p-6 text-left transition-all duration-200 hover:border-red-600 hover:shadow-lg"
             >
               <div className="flex flex-col space-y-4">
                 {/* Icon */}
-                <div className={`${section.iconBg} w-16 h-16 rounded-xl flex items-center justify-center shadow-sm`}>
-                  <Icon size={32} className={section.iconColor} />
+                <div className="w-12 h-12 rounded-lg bg-red-50 group-hover:bg-red-600 flex items-center justify-center transition-colors">
+                  <Icon size={24} className="text-red-600 group-hover:text-white transition-colors" />
                 </div>
                 
                 {/* Content */}
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-gray-800">
+                <div className="space-y-1">
+                  <h3 className="text-base font-semibold text-gray-900 group-hover:text-red-700 transition-colors">
                     {section.title}
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-500">
                     {section.description}
                   </p>
                 </div>
 
                 {/* Arrow indicator */}
-                <div className="flex items-center text-red-600 font-semibold text-sm pt-2">
+                <div className="flex items-center text-red-600 font-semibold text-sm pt-2 border-t border-gray-100 group-hover:text-red-700 transition-colors">
                   <span>Administrar</span>
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>

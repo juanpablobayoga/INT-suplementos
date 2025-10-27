@@ -1,7 +1,7 @@
 import CategoryPageBase from './CategoryPageBase';
 import preentrenosImg from '../../assets/images/preentrenos.jpg';
 
-const PreEntreno = () => {
+const PreEntrenos = () => {
   return (
     <CategoryPageBase
       title="Pre-entrenos y Energía"
@@ -67,8 +67,30 @@ const PreEntreno = () => {
           </div>
         </div>
       </div>
+
+      <div className="mb-12">
+        <h3 className="text-2xl font-bold text-gray-900 mb-4">Ingredientes clave</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-lg shadow-sm text-center">
+            <h4 className="font-semibold text-gray-900 mb-2">Cafeína</h4>
+            <p className="text-xs text-gray-600">150-300mg para energía sostenida</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm text-center">
+            <h4 className="font-semibold text-gray-900 mb-2">Beta-Alanina</h4>
+            <p className="text-xs text-gray-600">Reduce fatiga muscular</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm text-center">
+            <h4 className="font-semibold text-gray-900 mb-2">Citrulina</h4>
+            <p className="text-xs text-gray-600">Mejor flujo sanguíneo</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm text-center">
+            <h4 className="font-semibold text-gray-900 mb-2">Taurina</h4>
+            <p className="text-xs text-gray-600">Hidratación celular</p>
+          </div>
+        </div>
+      </div>
     </CategoryPageBase>
   );
 };
 
-export default PreEntreno;
+export default PreEntrenos;

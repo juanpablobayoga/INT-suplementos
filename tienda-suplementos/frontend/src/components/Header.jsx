@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import logoImg from '../assets/images/Captura_de_pantalla_2025-08-09_192459-removebg-preview.png';
@@ -14,6 +15,9 @@ const Header = () => {
   const { openSearch } = useUI();
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  // Estado para abrir/cerrar Catálogo con portal a body (evita límite del navbar con transform)
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const closeTimerRef = useRef(null);
 
   const handleUserClick = () => {
     if (isAuthenticated) {
@@ -26,11 +30,11 @@ const Header = () => {
   useEffect(() => {
     const handleScroll = () => {
       const navbar = document.getElementById('main-navbar');
-      const catalogDropdown = document.getElementById('catalog-dropdown');
+  // const catalogDropdown = document.getElementById('catalog-dropdown');
       const accessoriesDropdown = document.getElementById('accesorios-dropdown');
       const nosotrosDropdown = document.getElementById('nosotros-dropdown');
-
-      const catalogContent = catalogDropdown ? catalogDropdown.querySelector('.catalog-content') : null;
+  // Eliminamos control directo de altura/padding del catálogo para evitar espacios vacíos
+  // const catalogContent = catalogDropdown ? catalogDropdown.querySelector('.catalog-content') : null;
       const accessoriesContent = accessoriesDropdown ? accessoriesDropdown.querySelector('div') : null;
       const nosotrosContent = nosotrosDropdown ? nosotrosDropdown.querySelector('div') : null;
 
@@ -39,16 +43,16 @@ const Header = () => {
       if (navbar) {
         if (y > 40) {
           navbar.style.top = '20px';
+          // Dropdown del catálogo sigue al navbar: 20px (navbar) + 56px (altura aprox navbar) + 14px margen = 90px
+          document.documentElement.style.setProperty('--catalog-top', '90px');
         } else {
           navbar.style.top = '40px';
+          // Dropdown del catálogo sigue al navbar: 40px (navbar) + 56px (altura aprox navbar) + 14px margen = 110px
+          document.documentElement.style.setProperty('--catalog-top', '110px');
         }
       }
 
       if (y > 40) {
-        if (catalogDropdown && catalogDropdown.classList.contains('fixed') && catalogContent) {
-          catalogDropdown.style.height = '440px';
-          catalogContent.style.paddingTop = '80px';
-        }
         if (accessoriesDropdown && accessoriesDropdown.classList.contains('fixed') && accessoriesContent && nosotrosDropdown && nosotrosDropdown.classList.contains('fixed') && nosotrosContent) {
           accessoriesDropdown.style.height = '260px';
           accessoriesContent.style.paddingTop = '80px';
@@ -56,10 +60,6 @@ const Header = () => {
           nosotrosContent.style.paddingTop = '80px';
         }
       } else {
-        if (catalogDropdown && catalogDropdown.classList.contains('fixed') && catalogContent) {
-          catalogDropdown.style.height = '480px';
-          catalogContent.style.paddingTop = '128px';
-        }
         if (accessoriesDropdown && accessoriesDropdown.classList.contains('fixed') && accessoriesContent && nosotrosDropdown && nosotrosDropdown.classList.contains('fixed') && nosotrosContent) {
           accessoriesDropdown.style.height = '300px';
           accessoriesContent.style.paddingTop = '128px';
@@ -104,18 +104,27 @@ const Header = () => {
                 e.currentTarget.style.display = 'none';
               }}
             />
-           
           </Link>
         </div>
 
         {/* Enlaces principales */}
-  <div className="hidden lg:flex items-center gap-6 font-display">
+        <div className="hidden lg:flex items-center gap-6 font-display">
           <Link to="/" className="text-white font-medium hover:text-red-400 transition-all duration-300 hover:-translate-y-1">
             Inicio
           </Link>
 
-          {/* Dropdown Catálogo */}
-          <div className="relative group">
+          {/* Dropdown Catálogo (portal al body para ocupar todo el ancho) */}
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (closeTimerRef.current) { clearTimeout(closeTimerRef.current); closeTimerRef.current = null; }
+              setCatalogOpen(true);
+            }}
+            onMouseLeave={() => {
+              // pequeño delay para permitir mover el mouse al panel sin parpadeo
+              closeTimerRef.current = setTimeout(() => setCatalogOpen(false), 120);
+            }}
+          >
             <button className="text-white font-medium flex items-center gap-2 hover:text-red-400 transition-all duration-300 hover:-translate-y-1 font-display">
               Catálogo
               <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,134 +132,80 @@ const Header = () => {
               </svg>
             </button>
 
-            {/* Contenedor dropdown Catálogo */}
-            <div
-              id="catalog-dropdown"
-              className="absolute top-full mt-[30px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500"
-              style={{ left: '-200px', transform: 'translateX(0)', width: 'min(900px, 85vw)' }}
-            >
-              <div className="bg-black/85 backdrop-blur-xl rounded-3xl px-8 pt-4 pb-8 border border-white/20 shadow-2xl catalog-content">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-16 justify-items-center place-items-center">
-                  {/* Proteína */}
+            {/* Contenedor dropdown Catálogo en full-width (portal fuera del navbar) */}
+            {createPortal(
+              <div
+                id="catalog-dropdown"
+                className={`fixed inset-x-0 z-40 transition-all duration-300 ease-out ${catalogOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
+                style={{ top: 'var(--catalog-top, 110px)' }}
+                onMouseEnter={() => {
+                  if (closeTimerRef.current) { clearTimeout(closeTimerRef.current); closeTimerRef.current = null; }
+                  setCatalogOpen(true);
+                }}
+                onMouseLeave={() => setCatalogOpen(false)}
+              >
+                <div className="bg-black/85 backdrop-blur-xl shadow-2xl catalog-content w-[98vw] mx-auto px-8 py-5 rounded-3xl">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 justify-items-center place-items-center">
+                  {/* Proteínas */}
                   <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/proteinas" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Proteína
-                    </Link>
+                    <Link to="/products/proteinas" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Proteínas</Link>
                     <Link to="/products/proteinas" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/ISO100-1.3_1440x1440.jpg?v=1721497080"
-                        alt="Proteína"
-                        className="w-20 h-20 object-cover"
-                      />
+                      <img src="https://swsuppss.com/cdn/shop/files/ISO100-1.3_1440x1440.jpg?v=1721497080" alt="Proteínas" className="w-24 h-24 object-cover" />
                     </Link>
                   </div>
-
-                  {/* Creatina */}
+                  {/* Pre-entrenos y Energía */}
                   <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/creatina" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Creatina
-                    </Link>
-                    <Link to="/products/creatina" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/NUTREX_1440x1440.jpg?v=1721492842"
-                        alt="Creatina"
-                        className="w-20 h-20 object-cover"
-                      />
-                    </Link>
-                  </div>
-
-                  {/* Pre entreno */}
-                  <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/preworkout" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Pre entreno
-                    </Link>
+                    <Link to="/products/preworkout" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Pre-entrenos y Energía</Link>
                     <Link to="/products/preworkout" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/PORTADA_ec4a9ae4-06e4-4fb7-91c0-a61fc19fbed6_1440x1440.jpg?v=1750987008"
-                        alt="Pre entreno"
-                        className="w-20 h-20 object-cover"
-                      />
+                      <img src="https://swsuppss.com/cdn/shop/files/PORTADA_ec4a9ae4-06e4-4fb7-91c0-a61fc19fbed6_1440x1440.jpg?v=1750987008" alt="Pre-entrenos y Energía" className="w-24 h-24 object-cover" />
                     </Link>
                   </div>
-
-                  {/* Aminoácidos */}
+                  {/* Creatinas */}
                   <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/aminoacidos" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Aminoácidos
+                    <Link to="/products/creatina" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Creatinas</Link>
+                    <Link to="/products/creatina" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                      <img src="https://swsuppss.com/cdn/shop/files/NUTREX_1440x1440.jpg?v=1721492842" alt="Creatinas" className="w-24 h-24 object-cover" />
                     </Link>
+                  </div>
+                  {/* Aminoácidos y Recuperadores */}
+                  <div className="flex flex-col items-center text-center group/item">
+                    <Link to="/products/aminoacidos" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Aminoácidos y Recuperadores</Link>
                     <Link to="/products/aminoacidos" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/aminox-30_1440x1440.jpg?v=1721575679"
-                        alt="Aminoácidos"
-                        className="w-20 h-20 object-cover"
-                      />
+                      <img src="https://swsuppss.com/cdn/shop/files/aminox-30_1440x1440.jpg?v=1721575679" alt="Aminoácidos y Recuperadores" className="w-24 h-24 object-cover" />
                     </Link>
                   </div>
-
-                  {/* Vitaminas */}
+                  {/* Salud y Bienestar */}
                   <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/vitaminas" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Vitaminas
-                    </Link>
-                    <Link to="/products/vitaminas" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/PORTADA_1_5988643b-a584-41de-bb44-42f3fff9e8c7_1440x1440.jpg?v=1753489463"
-                        alt="Vitaminas"
-                        className="w-20 h-20 object-cover"
-                      />
-                    </Link>
-                  </div>
-
-                  {/* Para la salud */}
-                  <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/salud" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Para la salud
-                    </Link>
+                    <Link to="/products/salud" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Salud y Bienestar</Link>
                     <Link to="/products/salud" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/PORTADA_2_1440x1440.jpg?v=1743652920"
-                        alt="Salud"
-                        className="w-20 h-20 object-cover"
-                      />
+                      <img src="https://swsuppss.com/cdn/shop/files/PORTADA_2_1440x1440.jpg?v=1743652920" alt="Salud y Bienestar" className="w-24 h-24 object-cover" />
                     </Link>
                   </div>
-
-                  {/* complementos */}
+                  {/* Rendimiento hormonal */}
                   <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/complementos" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Complementos
-                    </Link>
+                    <Link to="/products/complementos" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Rendimiento hormonal</Link>
                     <Link to="/products/complementos" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/PORTADA_7_1440x1440.png?v=1732233658"
-                        alt="Complementos"
-                        className="w-20 h-20 object-cover"
-                      />
+                      <img src="https://swsuppss.com/cdn/shop/files/PORTADA_7_1440x1440.png?v=1732233658" alt="Rendimiento hormonal" className="w-24 h-24 object-cover" />
                     </Link>
                   </div>
-
-                  {/* Demás / Comida */}
+                  {/* Comidas con proteína */}
                   <div className="flex flex-col items-center text-center group/item">
-                    <Link to="/products/comida" className="text-white font-medium hover:text-red-400 transition-colors mb-4 text-sm">
-                      Comida
-                    </Link>
+                    <Link to="/products/comida" className="text-white font-medium hover:text-red-400 transition-colors mb-2 text-[15px] sm:text-base">Comidas con proteína</Link>
                     <Link to="/products/comida" className="block overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      <img
-                        src="https://swsuppss.com/cdn/shop/files/PORTADA_7_1440x1440.png?v=1732233658"
-                        alt="Comida"
-                        className="w-20 h-20 object-cover"
-                      />
+                      <img src="https://swsuppss.com/cdn/shop/files/PORTADA_7_1440x1440.png?v=1732233658" alt="Comidas con proteína" className="w-24 h-24 object-cover" />
                     </Link>
+                  </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </div>,
+              document.body
+            )}
           </div>
 
           {/* Dropdown Accesorios */}
           <div className="relative group">
             <button className="text-white font-medium flex items-center gap-2 hover:text-red-400 transition-all duration-300 hover:-translate-y-1 font-display">
-              Accesorios
+              Implementos
               <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -355,7 +310,7 @@ const Header = () => {
         </div>
 
         {/* Iconos de acción */}
-  <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <a href="#" className="rounded-full bg-white/10 p-2 hover:bg-red-500/20 hover:scale-110 transition-all duration-300" aria-label="Favoritos">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-5 h-5 text-white" fill="currentColor">
               <path d="M178,42c-21,0-39.26,9.47-50,25.34C117.26,51.47,99,42,78,42a60.07,60.07,0,0,0-60,60c0,29.2,18.2,59.59,54.1,90.31a334.68,334.68,0,0,0,53.06,37,6,6,0,0,0,5.68,0,334.68,334.68,0,0,0,53.06-37C219.8,161.59,238,131.2,238,102A60.07,60.07,0,0,0,178,42ZM128,217.11C111.59,207.64,30,157.72,30,102A48.05,48.05,0,0,1,78,54c20.28,0,37.31,10.83,44.45,28.27a6,6,0,0,0,11.1,0C140.69,64.83,157.72,54,178,54a48.05,48.05,0,0,1,48,48C226,157.72,144.41,207.64,128,217.11Z"></path>

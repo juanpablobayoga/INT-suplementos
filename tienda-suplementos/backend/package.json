@@ -10,7 +10,12 @@
     "create-indexes": "node scripts/createIndexes.js",
     "drop-indexes": "node scripts/createIndexes.js drop",
     "seed": "node seed.js",
-    "db:setup": "npm run create-indexes && npm run seed"
+    "seed:json": "node seedProductsFromJSON.js",
+    "seed:productos": "node seedProductosReales.js",
+    "seed:help": "node seedProductosReales.js --help",
+    "db:setup": "npm run create-indexes && npm run seed",
+    "db:productos": "npm run create-indexes && npm run seed:productos",
+    "db:setup:json": "npm run create-indexes && npm run seed:json"
   },
   "keywords": [],
   "author": "",

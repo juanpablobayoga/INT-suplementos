@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
 import { uploadImage } from '../../services/api';
 
-// Categorías que coinciden con el navbar (8 categorías principales)
-const categories = ['Proteínas','Creatina','Aminoácidos','Pre-Workout','Vitaminas','Para la salud','Complementos','Comida'];
+// Taxonomía 2025 (7 categorías principales)
+const categories = [
+  'Proteínas',
+  'Pre-entrenos y Energía',
+  'Creatinas',
+  'Aminoácidos y Recuperadores',
+  'Salud y Bienestar',
+  'Rendimiento hormonal',
+  'Comidas con proteína'
+];
 
 // editingMode: boolean indica si estamos editando un producto existente.
 // categoryLocked: boolean indica si la categoría está pre-seleccionada y no debe ser editable (desde panel de categoría/subcategoría)
@@ -34,7 +42,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
   const update = (k, v) => {
     // Si se cambia la categoría, limpiar el tipo si no aplica
     if (k === 'category') {
-      if (v !== 'Proteínas' && v !== 'Creatina') {
+      if (v !== 'Proteínas' && v !== 'Creatina' && v !== 'Creatinas') {
         setForm(f => ({ ...f, [k]: v, tipo: '' }));
         return;
       }
@@ -154,7 +162,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
     };
     
     // Limpiar tipo si no aplica a la categoría
-    if (form.category !== 'Proteínas' && form.category !== 'Creatina') {
+    if (form.category !== 'Proteínas' && form.category !== 'Creatina' && form.category !== 'Creatinas') {
       delete payload.tipo;
     }
     
@@ -164,7 +172,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
   return (
     <form onSubmit={submit} className="space-y-6">
       {/* Información Básica */}
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 space-y-4">
+      <div className=" rounded-lg p-4 space-y-4">
         <h3 className="text-sm font-bold text-red-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -178,7 +186,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
             <input 
               value={form.name} 
               onChange={e=>update('name', e.target.value)} 
-              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all" 
+              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
               placeholder="Ej: Whey Protein Premium"
               required 
             />
@@ -194,7 +202,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
                 step="0.01" 
                 value={form.price} 
                 onChange={e=>update('price', e.target.value)} 
-                className="w-full pl-7 border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all" 
+                className="w-full pl-7 border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
                 placeholder="0.00"
                 required 
               />
@@ -214,7 +222,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
                 step="0.01"
                 value={form.originalPrice || ''}
                 onChange={e=>update('originalPrice', e.target.value)}
-                className="w-full pl-7 border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+                className="w-full pl-7 border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all"
                 placeholder="Precio anterior para mostrar descuento"
               />
             </div>
@@ -227,7 +235,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
           <input 
             value={form.baseSize} 
             onChange={e=>update('baseSize', e.target.value)} 
-            className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all" 
+            className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
             placeholder="Ej: 4 libras / 400g / 30 servings"
             required 
           />
@@ -235,7 +243,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
       </div>
 
       {/* Categoría y Tipo */}
-      <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg p-4 space-y-4">
+      <div className=" p-4 space-y-4">
         <h3 className="text-sm font-bold text-rose-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -249,7 +257,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
             <select 
               value={form.category} 
               onChange={e=>update('category', e.target.value)} 
-              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all bg-white"
+              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all"
             >
               {categories.map(c => <option key={c}>{c}</option>)}
             </select>
@@ -257,14 +265,14 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
             <input
               value={form.category}
               readOnly
-              className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-100 cursor-not-allowed"
+              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all"
               title="Categoría preseleccionada según el panel"
             />
           ) : (
             <select 
               value={form.category} 
               onChange={e=>update('category', e.target.value)} 
-              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all bg-white" 
+              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
               required
             >
               <option value="">Selecciona una categoría</option>
@@ -273,14 +281,14 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
           )}
         </label>
         
-        {/* Campo Tipo - Solo para Proteínas y Creatina */}
-        {(form.category === 'Proteínas' || form.category === 'Creatina') && (
+        {/* Campo Tipo - Solo para Proteínas y Creatina/Creatinas */}
+        {(form.category === 'Proteínas' || form.category === 'Creatina' || form.category === 'Creatinas') && (
           <label className="block">
             <span className="text-xs font-semibold text-gray-700 mb-1 block">Tipo/Subcategoría *</span>
             <select 
               value={form.tipo || ''} 
               onChange={e=>update('tipo', e.target.value)} 
-              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all bg-white"
+              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all bg-white"
               required
             >
               <option value="">Selecciona un tipo</option>
@@ -291,7 +299,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
                   <option value="Vegana">Vegana</option>
                 </>
               )}
-              {form.category === 'Creatina' && (
+              {(form.category === 'Creatina' || form.category === 'Creatinas') && (
                 <>
                   <option value="Monohidrato">Monohidrato</option>
                   <option value="HCL">HCL</option>
@@ -303,7 +311,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
       </div>
 
       {/* Imagen */}
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 space-y-3">
+      <div className=" p-4 space-y-3">
         <h3 className="text-sm font-bold text-orange-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -315,7 +323,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
           <input 
             value={form.image} 
             onChange={e=>update('image', e.target.value)} 
-            className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all" 
+            className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
             placeholder="URL de la imagen"
             required 
           />
@@ -333,7 +341,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
               />
               <label 
                 htmlFor="imageUpload" 
-                className="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 border-2 border-orange-300 rounded-lg text-sm font-medium bg-white hover:bg-orange-50 transition-all shadow-sm"
+                className="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 border-2 border-red-700 rounded-lg text-sm font-medium bg-white hover:bg-gray-300 transition-all shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -366,8 +374,8 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
       </div>
 
       {/* Disponibilidad y Estado */}
-      <div className="bg-gradient-to-r from-red-50 to-rose-50 rounded-lg p-4 space-y-3">
-        <h3 className="text-sm font-bold text-red-900 flex items-center gap-2">
+      <div className=" p-4 space-y-3">
+        <h3 className="text-sm font-bold text-red-700 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -375,12 +383,13 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
         </h3>
         
         <div className="flex flex-col gap-3">
-          <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-400 transition-all">
+          <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-700 transition-all">
             <input 
               type="checkbox" 
               checked={form.inStock !== false} 
               onChange={e=>update('inStock', e.target.checked)} 
-              className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500"
+              className="w-5 h-5 rounded border-gray-300 text-red-700 focus:ring-2 focus:ring-red-700"
+              style={{ accentColor: '#b91c1c' }}
             />
             <div className="flex-1">
               <span className="text-sm font-semibold text-gray-800">Hay stock disponible</span>
@@ -391,12 +400,13 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
             </span>
           </label>
           
-          <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-400 transition-all">
+          <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-700 transition-all">
             <input 
               type="checkbox" 
               checked={form.isActive} 
               onChange={e=>update('isActive', e.target.checked)} 
-              className="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500"
+              className="w-5 h-5 rounded border-gray-300 text-red-700 focus:ring-2 focus:ring-red-700"
+              style={{ accentColor: '#b91c1c' }}
             />
             <div className="flex-1">
               <span className="text-sm font-semibold text-gray-800">Producto activo</span>
@@ -410,7 +420,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
       </div>
 
       {/* Descripción */}
-      <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg p-4 space-y-3">
+      <div className=" p-4 space-y-3">
         <h3 className="text-sm font-bold text-pink-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
@@ -421,13 +431,13 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
           value={form.description} 
           onChange={e=>update('description', e.target.value)} 
           rows={4} 
-          className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all resize-none"
+          className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all"
           placeholder="Describe el producto, sus beneficios, ingredientes, modo de uso, etc."
         />
       </div>
 
       {/* Variantes */}
-      <div className="bg-gradient-to-r from-red-100 to-orange-100 rounded-lg p-4 space-y-3">
+      <div className=" p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-red-800 flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -464,7 +474,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
                     <input 
                       value={v.size} 
                       onChange={e=>updateVariant(idx,'size', e.target.value)} 
-                      className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all" 
+                      className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
                       placeholder="Ej: 4 libras" 
                     />
                   </label>
@@ -478,7 +488,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
                         step="0.01" 
                         value={v.price} 
                         onChange={e=>updateVariant(idx,'price', e.target.value)} 
-                        className="w-full pl-7 border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all" 
+                        className="w-full pl-7 border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
                       />
                     </div>
                   </label>
@@ -499,7 +509,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
                   <input 
                     value={v.image} 
                     onChange={e=>updateVariant(idx,'image', e.target.value)} 
-                    className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all" 
+                    className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-red-700 focus:outline-none transition-all" 
                     placeholder="URL de la imagen" 
                   />
                   <div className="flex items-center gap-2">
@@ -550,7 +560,7 @@ export default function ProductForm({ initialValue, onCancel, onSave, saving, ed
       </div>
 
       {/* Sabores */}
-      <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg p-4 space-y-3">
+      <div className=" p-4 space-y-3">
         <h3 className="text-sm font-bold text-rose-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />

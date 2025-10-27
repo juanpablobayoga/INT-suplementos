@@ -4,16 +4,18 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import creatinasImg from '../assets/images/creatinas.jpg';
 import proteinasImg from '../assets/images/proteinas.jpg';
+import preentrenosImg from '../assets/images/preentrenos.jpg';
+import aminoacidosImg from '../assets/images/aminos.jpg';
 
+// 7 categorías nuevas (slugs provisionales mapeados en Products.jsx)
 const BASE = [
-  { id: 1, name: 'Creatinas', image: creatinasImg, link: '/products/creatina' },
-  { id: 2, name: 'Pre-entrenos', image: creatinasImg, link: '/products/preworkout' },
-  { id: 3, name: 'Aminoácidos', image: creatinasImg, link: '/products/aminoacidos' },
-  { id: 4, name: 'Vitaminas', image: proteinasImg, link: '/products/vitaminas' },
-  { id: 5, name: 'Proteínas', image: proteinasImg, link: '/products/proteinas' },
-  { id: 6, name: 'Complementos', image: proteinasImg, link: '/products/complementos' },
-  { id: 7, name: 'Salud', image: creatinasImg, link: '/products/salud' },
-  { id: 8, name: 'Comida', image: proteinasImg, link: '/products/comida' }
+  { id: 1, name: 'Proteínas', image: proteinasImg, link: '/products/proteinas' },
+  { id: 2, name: 'Pre-entrenos y Energía', image: preentrenosImg, link: '/products/preworkout' },
+  { id: 3, name: 'Creatinas', image: creatinasImg, link: '/products/creatina' },
+  { id: 4, name: 'Aminoácidos y Recuperadores', image: aminoacidosImg, link: '/products/aminoacidos' },
+  { id: 5, name: 'Salud y Bienestar', image: proteinasImg, link: '/products/salud' },
+  { id: 6, name: 'Rendimiento hormonal', image: creatinasImg, link: '/products/complementos' },
+  { id: 7, name: 'Comidas con proteína', image: proteinasImg, link: '/products/comida' }
 ];
 
 export default function CategoryCarouselClean() {

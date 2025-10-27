@@ -1,0 +1,222 @@
+{
+  "categories": [
+    "Proteínas",
+    "Creatinas", 
+    "Pre-entrenos y Energía",
+    "Aminoácidos y Recuperadores",
+    "Salud y Bienestar",
+    "Rendimiento hormonal",
+    "Comidas con proteína"
+  ],
+  "products": [
+    {
+      "name": "Whey Protein Gold Standard",
+      "description": "La proteína de suero más vendida del mundo. Fórmula premium con 24g de proteína por servicio, aminoácidos esenciales y absorción rápida ideal para post-entreno.",
+      "price": 95000,
+      "category": "Proteínas",
+      "brand": "Optimum Nutrition",
+      "images": ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"],
+      "variants": [
+        {"size": "1 lb", "price": 55000},
+        {"size": "2 lb", "price": 95000},
+        {"size": "5 lb", "price": 210000}
+      ],
+      "flavors": ["Double Rich Chocolate", "Vainilla", "Fresa", "Cookies & Cream", "Banana"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 50,
+      "rating": 4.8,
+      "productType": "Whey Isolate"
+    },
+    {
+      "name": "Proteína Isolate Premium",
+      "description": "Proteína aislada de suero con 90% de pureza. Libre de lactosa y grasas, ideal para definición muscular y personas con intolerancia a la lactosa.",
+      "price": 120000,
+      "category": "Proteínas", 
+      "brand": "Dymatize",
+      "images": ["https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400"],
+      "variants": [
+        {"size": "1.5 lb", "price": 120000},
+        {"size": "3 lb", "price": 215000}
+      ],
+      "flavors": ["Chocolate", "Vainilla", "Frutilla"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 35,
+      "rating": 4.9,
+      "productType": "Whey Isolate"
+    },
+    {
+      "name": "Caseína Micelar Nocturna",
+      "description": "Proteína de digestión lenta ideal para tomar antes de dormir. Liberación sostenida de aminoácidos durante 6-8 horas para máxima recuperación nocturna.",
+      "price": 85000,
+      "category": "Proteínas",
+      "brand": "Optimum Nutrition", 
+      "images": ["https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=400"],
+      "variants": [
+        {"size": "2 lb", "price": 85000},
+        {"size": "4 lb", "price": 155000}
+      ],
+      "flavors": ["Chocolate", "Vainilla", "Cookies & Cream"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 25,
+      "rating": 4.7,
+      "productType": "Caseína"
+    },
+    {
+      "name": "Creatina Monohidrato Pura",
+      "description": "Creatina monohidrato 100% pura, sin aditivos. Estudios científicos demuestran aumento del 15% en fuerza y potencia muscular.",
+      "price": 35000,
+      "category": "Creatinas",
+      "brand": "Creapure",
+      "images": ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"],
+      "variants": [
+        {"size": "300g", "price": 35000},
+        {"size": "500g", "price": 55000},
+        {"size": "1000g", "price": 95000}
+      ],
+      "flavors": ["Sin sabor"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 75,
+      "rating": 4.8,
+      "productType": "Monohidrato"
+    },
+    {
+      "name": "Creatina HCL Avanzada",
+      "description": "Creatina HCL de máxima solubilidad. Requiere menor dosis, sin retención de líquidos y digestión más cómoda que la creatina tradicional.",
+      "price": 65000,
+      "category": "Creatinas",
+      "brand": "Kaged Muscle",
+      "images": ["https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=400"],
+      "variants": [
+        {"size": "75 servings", "price": 65000}
+      ],
+      "flavors": ["Sin sabor", "Limonada"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 40,
+      "rating": 4.6,
+      "productType": "HCL"
+    },
+    {
+      "name": "Pre-Entreno Explosivo",
+      "description": "Fórmula pre-entreno con 300mg de cafeína, beta-alanina, citrulina y nootrópicos. Energía intensa, enfoque mental y pump muscular extremo.",
+      "price": 75000,
+      "category": "Pre-entrenos y Energía",
+      "brand": "C4 Original",
+      "images": ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"],
+      "variants": [
+        {"size": "30 servicios", "price": 75000},
+        {"size": "60 servicios", "price": 135000}
+      ],
+      "flavors": ["Blue Razz", "Fruit Punch", "Watermelon", "Orange Burst"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 60,
+      "rating": 4.7
+    },
+    {
+      "name": "BCAAs 2:1:1 Premium",
+      "description": "Aminoácidos de cadena ramificada en proporción 2:1:1 (Leucina:Isoleucina:Valina). Reduce fatiga muscular y acelera recuperación durante y después del entrenamiento.",
+      "price": 55000,
+      "category": "Aminoácidos y Recuperadores",
+      "brand": "Scivation Xtend",
+      "images": ["https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=400"],
+      "variants": [
+        {"size": "30 servicios", "price": 55000},
+        {"size": "90 servicios", "price": 145000}
+      ],
+      "flavors": ["Blue Raspberry Ice", "Mango Madness", "Watermelon Explosion", "Grape"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 45,
+      "rating": 4.6
+    },
+    {
+      "name": "Glutamina Pura L-Glutamine",
+      "description": "L-Glutamina 100% pura para recuperación muscular y salud intestinal. Aminoácido más abundante en músculos, esencial para deportistas de alto rendimiento.",
+      "price": 45000,
+      "category": "Aminoácidos y Recuperadores", 
+      "brand": "Optimum Nutrition",
+      "images": ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"],
+      "variants": [
+        {"size": "300g", "price": 45000},
+        {"size": "600g", "price": 80000}
+      ],
+      "flavors": ["Sin sabor"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 35,
+      "rating": 4.5
+    },
+    {
+      "name": "Multivitamínico Opti-Men",
+      "description": "Complejo vitamínico diseñado específicamente para hombres activos. 75+ ingredientes incluyendo vitaminas, minerales, antioxidantes y aminoácidos.",
+      "price": 65000,
+      "category": "Salud y Bienestar",
+      "brand": "Optimum Nutrition",
+      "images": ["https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=400"],
+      "variants": [
+        {"size": "90 tabletas", "price": 65000},
+        {"size": "180 tabletas", "price": 115000}
+      ],
+      "flavors": ["Sin sabor"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 50,
+      "rating": 4.4
+    },
+    {
+      "name": "Omega 3 Fish Oil",
+      "description": "Aceite de pescado purificado con alta concentración de EPA y DHA. Apoya salud cardiovascular, cerebral y reduce inflamación post-ejercicio.",
+      "price": 35000,
+      "category": "Salud y Bienestar",
+      "brand": "Nordic Naturals",
+      "images": ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"],
+      "variants": [
+        {"size": "60 cápsulas", "price": 35000},
+        {"size": "120 cápsulas", "price": 65000}
+      ],
+      "flavors": ["Natural", "Limón"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 40,
+      "rating": 4.7
+    },
+    {
+      "name": "ZMA (Zinc, Magnesio, B6)",
+      "description": "Complejo de zinc, magnesio y vitamina B6 para optimizar niveles de testosterona, mejorar calidad del sueño y acelerar recuperación muscular.",
+      "price": 45000,
+      "category": "Rendimiento hormonal",
+      "brand": "NOW Sports",
+      "images": ["https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=400"],
+      "variants": [
+        {"size": "90 cápsulas", "price": 45000}
+      ],
+      "flavors": ["Sin sabor"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 30,
+      "rating": 4.5
+    },
+    {
+      "name": "Barras Proteicas Quest",
+      "description": "Barras proteicas con 20g de proteína completa, fibra y 0 azúcar añadido. Perfectas como snack saludable o comida post-entreno.",
+      "price": 4500,
+      "category": "Comidas con proteína",
+      "brand": "Quest Nutrition",
+      "images": ["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"],
+      "variants": [
+        {"size": "Unidad", "price": 4500},
+        {"size": "Caja 12 unidades", "price": 48000}
+      ],
+      "flavors": ["Chocolate Chip Cookie Dough", "Cookies & Cream", "S'mores", "Double Chocolate Chunk"],
+      "inStock": true,
+      "isActive": true,
+      "stock": 120,
+      "rating": 4.3
+    }
+  ]
+}

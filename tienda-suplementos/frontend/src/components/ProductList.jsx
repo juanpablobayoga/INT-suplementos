@@ -44,8 +44,10 @@ const ProductList = ({ category, search }) => {
 	if (error) return <p className="text-red-500">{error}</p>;
 	if (!products.length) return <p className="text-gray-400">No hay productos.</p>;
 
-	// Determinar si mostrar pestañas de tipo (solo para Proteínas y Creatina)
-	const showTypeTabs = category === 'Proteínas' || category === 'Creatina';
+	// Determinar si mostrar pestañas de tipo (acepta singular/plural y variantes)
+	const proteinCategories = ['Proteínas', 'Proteína', 'Proteinas'];
+	const creatineCategories = ['Creatina', 'Creatinas'];
+	const showTypeTabs = proteinCategories.includes(category) || creatineCategories.includes(category);
 	const displayProducts = showTypeTabs ? filteredProducts : products;
 
 	return (

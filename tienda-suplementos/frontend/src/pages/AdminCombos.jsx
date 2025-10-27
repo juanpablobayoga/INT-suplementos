@@ -151,19 +151,16 @@ export default function AdminCombos() {
 
   return (
     <div className="pt-24 md:pt-28 p-6 max-w-6xl mx-auto space-y-6">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <button
             onClick={() => navigate('/admin/products')}
-            className="text-sm text-gray-600 hover:text-gray-900 mb-2 flex items-center gap-1"
+            className="text-xs text-indigo-600 hover:underline mb-2 flex items-center gap-1"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            Volver al Panel
+            ← Volver al Panel
           </button>
-          <h1 className="text-2xl font-bold">Combos de {categoryName}</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold mb-1">Combos de {categoryName}</h1>
+          <p className="text-sm text-gray-600">
             {combos.length} combo{combos.length !== 1 ? 's' : ''} en total
           </p>
         </div>
@@ -176,14 +173,26 @@ export default function AdminCombos() {
             Refrescar
           </button>
           
+          {/* Botón verde para crear */}
           <button
             onClick={openCreate}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            title="Agregar Nuevo Combo"
+            className="group cursor-pointer outline-none duration-300 hover:rotate-90 p-0 bg-transparent"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="50px"
+              height="50px"
+              viewBox="0 0 24 24"
+              className="stroke-green-400 fill-none group-hover:fill-green-800 group-active:stroke-green-200 group-active:fill-green-600 group-active:duration-0 duration-300"
+            >
+              <path
+                d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                strokeWidth="1.5"
+              ></path>
+              <path d="M8 12H16" strokeWidth="1.5"></path>
+              <path d="M12 16V8" strokeWidth="1.5"></path>
             </svg>
-            Nuevo Combo
           </button>
         </div>
       </header>
@@ -192,11 +201,11 @@ export default function AdminCombos() {
       {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">{error}</div>}
 
       {!loading && combos.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-gray-500 mb-4">No hay combos de {categoryName} aún</p>
           <button
             onClick={openCreate}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
           >
             Crear Primer Combo
           </button>
@@ -206,7 +215,7 @@ export default function AdminCombos() {
       {/* Lista de combos */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {combos.map(combo => (
-          <div key={combo._id} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div key={combo._id} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-red-600 hover:shadow-lg transition-all duration-200">
             <div className="relative h-48 bg-gray-100">
               {combo.image && (
                 <img
@@ -216,29 +225,29 @@ export default function AdminCombos() {
                 />
               )}
               {!combo.inStock && (
-                <div className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                   Sin Stock
                 </div>
               )}
               {combo.featured && (
-                <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                   Destacado
                 </div>
               )}
             </div>
             
             <div className="p-4">
-              <h3 className="font-bold text-lg mb-1">{combo.name}</h3>
-              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{combo.description}</p>
+              <h3 className="font-bold text-lg mb-1 text-gray-900">{combo.name}</h3>
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{combo.description}</p>
               
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xl font-bold text-green-600">${combo.price}</span>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xl font-bold text-red-600">${combo.price}</span>
                 {combo.originalPrice && combo.originalPrice > combo.price && (() => {
                   const pct = Math.round(((combo.originalPrice - combo.price) / combo.originalPrice) * 100);
                   return (
                     <>
                       <span className="text-sm text-gray-400 line-through">${combo.originalPrice}</span>
-                      <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">-{pct}%</span>
+                      <span className="text-xs bg-red-100 text-red-700 font-semibold px-2 py-0.5 rounded">-{pct}%</span>
                     </>
                   );
                 })()}
@@ -247,13 +256,13 @@ export default function AdminCombos() {
               <div className="flex gap-2">
                 <button
                   onClick={() => openEdit(combo)}
-                  className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  className="flex-1 px-3 py-2 bg-white border-2 border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:border-red-600 hover:text-red-700 transition-all"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => deleteCombo(combo)}
-                  className="flex-1 px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  className="flex-1 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Eliminar
                 </button>
@@ -267,106 +276,117 @@ export default function AdminCombos() {
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold">{editing ? 'Editar Combo' : 'Nuevo Combo'}</h2>
+            <h2 className="text-xl font-bold text-gray-900">{editing ? 'Editar Combo' : 'Nuevo Combo'}</h2>
             
             <form onSubmit={saveCombo} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Nombre *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre *</label>
                 <input
                   type="text"
                   required
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-red-700 focus:outline-none transition-all"
+                  placeholder="Ej: Combo Ganancia Muscular"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Descripción *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Descripción *</label>
                 <textarea
                   required
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
                   rows="3"
-                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-red-700 focus:outline-none transition-all"
+                  placeholder="Describe los beneficios del combo..."
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Precio *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Precio *</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={form.price}
                     onChange={e => setForm({ ...form, price: e.target.value })}
-                    className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-red-700 focus:outline-none transition-all"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Precio Original</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Precio Original</label>
                   <input
                     type="number"
                     step="0.01"
                     value={form.originalPrice}
                     onChange={e => setForm({ ...form, originalPrice: e.target.value })}
-                    className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-red-700 focus:outline-none transition-all"
+                    placeholder="0.00"
                   />
                 </div>
-                
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Imagen</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Imagen</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={e => setForm({ ...form, imageFile: e.target.files[0] })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-red-700 transition-all"
                 />
                 {editing && form.image && !form.imageFile && (
-                  <p className="text-xs text-gray-500 mt-1">Imagen actual: {form.image.split('/').pop()}</p>
+                  <p className="text-xs text-gray-500 mt-2">Imagen actual: {form.image.split('/').pop()}</p>
                 )}
               </div>
 
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2">
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-700 transition-all">
                   <input
                     type="checkbox"
                     checked={form.inStock}
                     onChange={e => setForm({ ...form, inStock: e.target.checked })}
-                    className="w-4 h-4"
+                    className="w-5 h-5 rounded border-gray-300 text-red-700 focus:ring-2 focus:ring-red-700"
+                    style={{ accentColor: '#b91c1c' }}
                   />
-                  <span className="text-sm">En Stock</span>
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-gray-800">Hay stock disponible</span>
+                    <p className="text-xs text-gray-500">El combo está disponible para la venta</p>
+                  </div>
                 </label>
                 
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:border-red-700 transition-all">
                   <input
                     type="checkbox"
                     checked={form.featured}
                     onChange={e => setForm({ ...form, featured: e.target.checked })}
-                    className="w-4 h-4"
+                    className="w-5 h-5 rounded border-gray-300 text-red-700 focus:ring-2 focus:ring-red-700"
+                    style={{ accentColor: '#b91c1c' }}
                   />
-                  <span className="text-sm">Destacado</span>
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-gray-800">Combo destacado</span>
+                    <p className="text-xs text-gray-500">Aparecerá en la sección destacados</p>
+                  </div>
                 </label>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 px-4 py-2 border rounded hover:bg-gray-50"
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all"
                   disabled={saving}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   disabled={saving}
                 >
-                  {saving ? 'Guardando...' : 'Guardar'}
+                  {saving ? 'Guardando...' : 'Guardar Combo'}
                 </button>
               </div>
             </form>

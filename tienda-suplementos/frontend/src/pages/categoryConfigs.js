@@ -5,6 +5,8 @@ import proteinasImg from '../assets/images/proteinas.jpg';
 import creatinasImg from '../assets/images/creatinas.jpg';
 import preentrenosImg from '../assets/images/preentrenos.jpg';
 import aminoacidosImg from '../assets/images/aminos.jpg';
+import vitaminasImg from '../assets/images/vitaminas.jpg';
+
 
 export const CATEGORY_META = {
   'Proteínas': {
@@ -37,9 +39,37 @@ export const CATEGORY_META = {
       src: aminoacidosImg,
       height: 'calc(100vh - 36px)',
       overlay: 'bg-black/20',
-    }
+    },
+  
   },
-  // Añade el resto según lo necesites
+   'Vitaminas': {
+    hero: {
+      type: 'image',
+      src: vitaminasImg,
+      height: 'calc(100vh - 36px)',
+      overlay: 'bg-black/20',
+    },
+  },  
+  
+  // Nuevas categorías (taxonomía 2025)
+  'Pre-entrenos y Energía': {
+    hero: { type: 'image', src: preentrenosImg, height: 'calc(100vh - 36px)', overlay: 'bg-black/20' }
+  },
+  'Creatinas': {
+    hero: { type: 'image', src: creatinasImg, height: 'calc(100vh - 36px)', overlay: 'bg-black/20' }
+  },
+  'Aminoácidos y Recuperadores': {
+    hero: { type: 'image', src: aminoacidosImg, height: 'calc(100vh - 36px)', overlay: 'bg-black/20' }
+  },
+  'Salud y Bienestar': {
+    hero: { type: 'image', src: vitaminasImg, height: 'calc(100vh - 36px)', overlay: 'bg-black/20' }
+  },
+  'Rendimiento hormonal': {
+    hero: { type: 'image', src: creatinasImg, height: 'calc(100vh - 36px)', overlay: 'bg-black/20' }
+  },
+  'Comidas con proteína': {
+    hero: { type: 'image', src: proteinasImg, height: 'calc(100vh - 36px)', overlay: 'bg-black/20' }
+  },
 };
 
 export default CATEGORY_META;

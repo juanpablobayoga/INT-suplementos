@@ -7,17 +7,15 @@ async function checkProducts() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Conectado a MongoDB');
     
-    const products = await Product.find({}).limit(10);
-    console.log(`\nEncontrados ${products.length} productos:`);
+    const products = await Product.find({});
+    console.log(`\nEncontrados ${products.length} productos (mostrando primeros 3):`);
     console.log('================================');
     
     products.forEach((product, index) => {
-      console.log(`${index + 1}. ID: ${product._id}`);
-      console.log(`   Nombre: ${product.name}`);
-      console.log(`   Precio: $${product.price}`);
-      console.log(`   SKU: ${product.sku || 'N/A'}`);
-      console.log(`   Stock: ${product.stock}`);
-      console.log('---');
+      console.log(`\n${index + 1}. PRODUCTO: ${product.name}`);
+      console.log('================================');
+      console.log(JSON.stringify(product.toObject(), null, 2));
+      console.log('================================');
     });
     
     process.exit(0);

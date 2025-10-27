@@ -81,8 +81,16 @@ async function seedProducts() {
     });
     console.log('Conectado a MongoDB');
 
-    await Product.deleteMany();
-    await Product.insertMany(products);
+    // NO borrar productos existentes - solo agregar si no existen
+    for (const product of products) {
+      const existing = await Product.findOne({ name: product.name });
+      if (!existing) {
+        await Product.create(product);
+        console.log(`✓ Agregado: ${product.name}`);
+      } else {
+        console.log(`- Ya existe: ${product.name}`);
+      }
+    }
     console.log('Productos insertados correctamente');
     process.exit();
   } catch (error) {

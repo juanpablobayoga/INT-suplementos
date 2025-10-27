@@ -1,5 +1,53 @@
 const mongoose = require('mongoose');
 
+// Categorías nuevas y legacy (compatibilidad transitoria)
+const NEW_CATEGORIES = [
+  'Proteínas',
+  'Pre-entrenos y Energía',
+  'Creatinas',
+  'Aminoácidos y Recuperadores',
+  'Salud y Bienestar',
+  'Rendimiento hormonal',
+  'Comidas con proteína'
+];
+
+const LEGACY_CATEGORIES = [
+  'Proteínas',
+  'Creatina',
+  'Aminoácidos',
+  'Pre-Workout',
+  'Vitaminas',
+  'Para la salud',
+  'Complementos',
+  'Comida'
+];
+
+const ALLOWED_CATEGORIES = Array.from(new Set([...NEW_CATEGORIES, ...LEGACY_CATEGORIES]));
+
+// Tipos/subcategorías permitidas por categoría (no obligatorio)
+const ALLOWED_TIPOS_BY_CATEGORY = {
+  // Proteínas
+  'Proteínas': ['Proteínas limpias', 'Proteínas hipercalóricas', 'Proteínas veganas', 'Limpia', 'Hipercalórica', 'Vegana'],
+  // Creatinas (nuevo y legacy)
+  'Creatina': ['Monohidratadas', 'HCL', 'Complejos de creatina', 'Monohidrato'],
+  'Creatinas': ['Monohidratadas', 'HCL', 'Complejos de creatina', 'Monohidrato'],
+  // Pre-entrenos y Energía (fusiona pre-workout/termogénicos/energizantes)
+  'Pre-entrenos y Energía': ['Pre-entrenos', 'Energizantes y bebidas', 'Termogénicos con cafeína'],
+  'Pre-Workout': ['Pre-entrenos', 'Energizantes y bebidas', 'Termogénicos con cafeína'],
+  // Aminoácidos y Recuperadores
+  'Aminoácidos': ['BCAA y EAA', 'Glutamina', 'Mezclas aminoácidas', 'Carbohidratos post-entreno'],
+  'Aminoácidos y Recuperadores': ['BCAA y EAA', 'Glutamina', 'Mezclas aminoácidas', 'Carbohidratos post-entreno'],
+  // Salud y Bienestar (fusiona vitaminas y salud)
+  'Vitaminas': ['Multivitamínicos', 'Vitaminas y minerales', 'Colágeno, omega y antioxidantes', 'Adaptógenos y suplementos naturales'],
+  'Para la salud': ['Multivitamínicos', 'Vitaminas y minerales', 'Colágeno, omega y antioxidantes', 'Adaptógenos y suplementos naturales'],
+  'Salud y Bienestar': ['Multivitamínicos', 'Vitaminas y minerales', 'Colágeno, omega y antioxidantes', 'Adaptógenos y suplementos naturales'],
+  // Rendimiento hormonal
+  'Rendimiento hormonal': ['Precursores de testosterona', 'Potenciadores masculinos naturales'],
+  // Comidas con proteína (nuevo y legacy)
+  'Comida': ['Pancakes y mezclas', 'Barras y galletas proteicas', 'Snacks funcionales'],
+  'Comidas con proteína': ['Pancakes y mezclas', 'Barras y galletas proteicas', 'Snacks funcionales']
+};
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -23,22 +71,17 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'La categoría es requerida'],
-    enum: ['Proteínas', 'Creatina', 'Aminoácidos', 'Pre-Workout', 'Vitaminas', 'Para la salud', 'Complementos', 'Comida']
+    enum: ALLOWED_CATEGORIES
   },
-  // Tipo/Subcategoría (solo para ciertas categorías)
+  // Tipo/Subcategoría (opcional). Si existe lista de permitidos, se valida; si no, se acepta libre.
   tipo: {
     type: String,
     trim: true,
-    // Validación condicional según categoría
     validate: {
       validator: function(value) {
-        if (this.category === 'Proteínas') {
-          return ['Limpia', 'Hipercalórica', 'Vegana'].includes(value);
-        }
-        if (this.category === 'Creatina') {
-          return ['Monohidrato', 'HCL'].includes(value);
-        }
-        // Para otras categorías, el tipo es opcional
+        const allowed = ALLOWED_TIPOS_BY_CATEGORY[this.category];
+        if (!value) return true; // opcional
+        if (Array.isArray(allowed)) return allowed.includes(value);
         return true;
       },
       message: 'Tipo no válido para la categoría seleccionada'
